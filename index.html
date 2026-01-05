@@ -3,259 +3,690 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NetFund Academy: Hub vs Switch Lab</title>
+    <title>Network Defense Academy</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-        :root {
-            --bg-color: #1e293b;
-            --terminal-green: #22c55e;
-            --danger-red: #ef4444;
-            --device-bg: #334155;
-            --text-color: #f8fafc;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1 { margin-bottom: 10px; }
-        p { max-width: 600px; text-align: center; line-height: 1.5; }
-
-        .controls {
-            margin: 20px 0;
-            display: flex;
-            gap: 15px;
-            background: var(--device-bg);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: transform 0.1s;
-        }
-
-        button:active { transform: scale(0.95); }
-        .btn-hub { background-color: var(--danger-red); color: white; }
-        .btn-switch { background-color: var(--terminal-green); color: black; }
-        .btn-send { background-color: #3b82f6; color: white; }
-
-        #network-canvas {
-            background-color: #0f172a;
-            border: 2px solid #475569;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-
-        .log-panel {
-            margin-top: 20px;
-            width: 600px;
-            height: 100px;
-            background: black;
-            color: var(--terminal-green);
-            font-family: monospace;
-            padding: 10px;
-            overflow-y: auto;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .handwriting { font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-blue-500 selection:text-white">
 
-    <h1>network_traffic_sim_v1.0</h1>
-    <p>Lesson 5.2.1: Determine where the data packets go. Select a device type and send a confidential message from <strong>PC 1</strong> to <strong>PC 4</strong>.</p>
-
-    <div class="controls">
-        <div>
-            <label>Current Device:</label>
-            <span id="device-label" style="font-weight:bold; color: var(--danger-red);">HUB</span>
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-10">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i data-lucide="shield" class="text-blue-500"></i>
+                <h1 class="text-xl font-bold tracking-tight">Network Defense Academy</h1>
+            </div>
+            <button id="back-btn" class="hidden px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm font-bold flex items-center gap-2">
+                <i data-lucide="arrow-left" width="16"></i> Back to Dashboard
+            </button>
         </div>
-        <button class="btn-hub" onclick="setMode('HUB')">Install Hub</button>
-        <button class="btn-switch" onclick="setMode('SWITCH')">Install Switch</button>
-        <div style="width: 20px;"></div> <button class="btn-send" onclick="sendPacket()">SEND PACKET</button>
-    </div>
+    </header>
 
-    <canvas id="network-canvas" width="600" height="400"></canvas>
+    <!-- Main Content Container -->
+    <main id="app-container" class="max-w-5xl mx-auto px-6 py-12">
+        <!-- Content injected via JS -->
+    </main>
 
-    <div class="log-panel" id="log">
-        > System Ready...<br>
-        > Waiting for device configuration...
-    </div>
+    <!-- TEMPLATES (Hidden, used by JS) -->
+    
+    <!-- DASHBOARD TEMPLATE -->
+    <template id="tpl-dashboard">
+        <div class="fade-in">
+            <div class="col-span-full mb-8 text-center space-y-4">
+                <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
+                    Welcome, Recruit.
+                </h2>
+                <p class="text-slate-400 max-w-2xl mx-auto text-lg">
+                    Complete all 5 training modules to earn your certification. 
+                    Start with hardware assembly and work your way up to protocol analysis.
+                </p>
+                <div id="badge-container" class="flex justify-center gap-2 flex-wrap"></div>
+            </div>
+            <div id="module-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+    </template>
+
+    <!-- DAY 1 TEMPLATE -->
+    <template id="tpl-day1">
+        <div class="p-6 flex flex-col items-center gap-8 fade-in">
+            <div id="d1-msg" class="bg-slate-900 p-4 rounded-lg border border-slate-600 w-full text-center text-green-400 font-mono">
+                > Mission: Assemble the computer by dragging components to their slots.
+            </div>
+
+            <!-- Draggables -->
+            <div id="d1-draggables" class="flex gap-4">
+                <div id="drag-cpu" draggable="true" class="cursor-grab p-4 bg-blue-900 rounded border border-blue-500 flex flex-col items-center hover:scale-105 transition">
+                    <i data-lucide="cpu" class="mb-1"></i><span>CPU</span>
+                </div>
+                <div id="drag-ram" draggable="true" class="cursor-grab p-4 bg-green-900 rounded border border-green-500 flex flex-col items-center hover:scale-105 transition">
+                    <i data-lucide="server" class="mb-1"></i><span>RAM</span>
+                </div>
+                <div id="drag-hdd" draggable="true" class="cursor-grab p-4 bg-orange-900 rounded border border-orange-500 flex flex-col items-center hover:scale-105 transition">
+                    <i data-lucide="hard-drive" class="mb-1"></i><span>HDD</span>
+                </div>
+            </div>
+
+            <!-- Motherboard -->
+            <div class="relative w-96 h-80 bg-slate-700 rounded-lg border-4 border-slate-600 shadow-2xl flex flex-col items-center justify-center gap-4">
+                <div class="absolute top-2 left-2 text-slate-500 font-bold opacity-50">MOTHERBOARD</div>
+                
+                <!-- CPU Slot -->
+                <div id="slot-cpu" class="w-24 h-24 border-2 border-dashed border-slate-500 bg-slate-800 rounded flex items-center justify-center transition-colors cursor-pointer">
+                    <span class="text-xs text-center text-slate-500 pointer-events-none">CPU Socket<br>"The Brain"</span>
+                </div>
+
+                <div class="flex gap-4">
+                    <!-- RAM Slot -->
+                    <div id="slot-ram" class="w-32 h-12 border-2 border-dashed border-slate-500 bg-slate-800 rounded flex items-center justify-center transition-colors cursor-pointer">
+                        <span class="text-xs text-center text-slate-500 pointer-events-none">RAM Slot<br>"Short-term"</span>
+                    </div>
+
+                    <!-- HDD Slot -->
+                    <div id="slot-hdd" class="w-24 h-24 border-2 border-dashed border-slate-500 bg-slate-800 rounded flex items-center justify-center transition-colors cursor-pointer">
+                        <span class="text-xs text-center text-slate-500 pointer-events-none">Storage<br>"Long-term"</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- DAY 2 TEMPLATE -->
+    <template id="tpl-day2">
+        <div class="flex flex-col items-center gap-4 fade-in">
+            <div class="flex gap-4 mb-2">
+                <button onclick="app.day2.setMode('HUB')" id="btn-hub" class="px-4 py-2 rounded-lg font-bold transition-all bg-slate-700 text-slate-200">Install HUB</button>
+                <button onclick="app.day2.setMode('SWITCH')" id="btn-switch" class="px-4 py-2 rounded-lg font-bold transition-all bg-slate-700 text-slate-200">Install SWITCH</button>
+                <button onclick="app.day2.sendPacket()" class="px-4 py-2 rounded-lg font-bold transition-all bg-blue-600 hover:bg-blue-500 text-white shadow-lg">Send Confidential Data</button>
+            </div>
+            <canvas id="network-canvas" width="600" height="400" class="bg-slate-900 rounded-xl border border-slate-700 shadow-inner"></canvas>
+            <div id="d2-logs" class="w-full max-w-xl bg-black font-mono text-green-500 p-4 rounded h-32 overflow-y-auto text-sm border border-slate-800">
+                > System Ready. Select device type.<br>
+            </div>
+        </div>
+    </template>
+
+    <!-- DAY 3 TEMPLATE -->
+    <template id="tpl-day3">
+        <div class="flex flex-col gap-6 max-w-2xl mx-auto fade-in">
+            <div id="d3-history" class="bg-slate-900 rounded-lg p-6 border border-slate-700 min-h-[300px] max-h-[400px] overflow-y-auto flex flex-col gap-4">
+                <div class="self-start bg-slate-800 border border-slate-700 p-3 rounded-lg max-w-[80%]">
+                    <div class="text-xs font-bold opacity-50 mb-1">Network</div>
+                    <div class="text-slate-200">Broadcast: Who has IP 10.0.0.1? Tell 10.0.0.3</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="app.day3.choose('wrong_me')" class="p-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-left text-sm transition-colors">
+                    <span class="font-bold block mb-2 text-red-400">Option A</span>
+                    "Hello? Is it me you're looking for?"
+                </button>
+                <button onclick="app.day3.choose('ignore')" class="p-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-left text-sm transition-colors">
+                    <span class="font-bold block mb-2 text-yellow-400">Option B</span>
+                    (Stay Silent / Ignore)
+                </button>
+                <button onclick="app.day3.choose('correct')" class="p-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-left text-sm transition-colors hover:border-green-500">
+                    <span class="font-bold block mb-2 text-green-400">Option C</span>
+                    "That's me! Here is my MAC Address."
+                </button>
+            </div>
+            
+            <div class="text-center text-slate-400 text-sm">
+                Roleplay: You are <strong>Computer C</strong> (IP 10.0.0.1). Answer the ARP request correctly.
+            </div>
+        </div>
+    </template>
+
+    <!-- DAY 4 TEMPLATE -->
+    <template id="tpl-day4">
+        <div class="flex flex-col items-center gap-8 fade-in">
+            <div class="bg-slate-800 p-4 rounded text-center max-w-lg border border-slate-600">
+                <p class="mb-2 text-white">The "Janitor" (Network) has dropped the message packets!</p>
+                <p class="text-sm text-slate-400">Click the floating gum wrappers to place them in the correct <strong>Sequence Number</strong> order.</p>
+            </div>
+
+            <!-- Floating Area -->
+            <div id="d4-area" class="relative w-full max-w-md h-64 bg-slate-900 border border-slate-700 rounded-xl overflow-hidden shadow-inner">
+                <!-- Packets injected by JS -->
+            </div>
+
+            <!-- Slots -->
+            <div class="flex gap-2">
+                <div id="slot-1" class="w-24 h-24 bg-slate-800 border-2 border-dashed border-slate-600 rounded flex flex-col items-center justify-center">
+                    <span class="text-slate-600 text-xs mb-1">SEQ 1</span>
+                    <div class="content"></div>
+                </div>
+                <div id="slot-2" class="w-24 h-24 bg-slate-800 border-2 border-dashed border-slate-600 rounded flex flex-col items-center justify-center">
+                    <span class="text-slate-600 text-xs mb-1">SEQ 2</span>
+                    <div class="content"></div>
+                </div>
+                <div id="slot-3" class="w-24 h-24 bg-slate-800 border-2 border-dashed border-slate-600 rounded flex flex-col items-center justify-center">
+                    <span class="text-slate-600 text-xs mb-1">SEQ 3</span>
+                    <div class="content"></div>
+                </div>
+                <div id="slot-4" class="w-24 h-24 bg-slate-800 border-2 border-dashed border-slate-600 rounded flex flex-col items-center justify-center">
+                    <span class="text-slate-600 text-xs mb-1">SEQ 4</span>
+                    <div class="content"></div>
+                </div>
+            </div>
+            
+            <div id="d4-success" class="hidden text-2xl font-bold text-green-400 animate-bounce mt-4">
+                MESSAGE: "GET THE MONEY"
+            </div>
+        </div>
+    </template>
+
+    <!-- DAY 5 TEMPLATE -->
+    <template id="tpl-day5">
+        <div id="d5-container" class="flex flex-col items-center gap-8 py-8 fade-in">
+            <!-- Content injected by JS -->
+        </div>
+    </template>
 
     <script>
-        // Configuration and State
-        const canvas = document.getElementById('network-canvas');
-        const ctx = canvas.getContext('2d');
-        const logPanel = document.getElementById('log');
-        
-        let currentMode = 'HUB'; // 'HUB' or 'SWITCH'
-        let packets = [];
-        let animationId;
+        // --- GLOBAL STATE ---
+        const state = {
+            completed: [false, false, false, false, false],
+            activeModule: null,
+            modules: [
+                { id: 1, title: "Hardware Lab", icon: "cpu" },
+                { id: 2, title: "Traffic Control", icon: "network" },
+                { id: 3, title: "ARP Identity", icon: "radio" },
+                { id: 4, title: "Mobster Net", icon: "message-square" },
+                { id: 5, title: "Handshake Hero", icon: "activity" }
+            ]
+        };
 
-        // Device Coordinates
-        const centerDevice = { x: 300, y: 200, r: 40, label: "HUB" };
-        const pcs = [
-            { id: 1, x: 100, y: 100, label: "PC 1 (Sender)", color: "#94a3b8" },
-            { id: 2, x: 500, y: 100, label: "PC 2", color: "#94a3b8" },
-            { id: 3, x: 100, y: 300, label: "PC 3", color: "#94a3b8" },
-            { id: 4, x: 500, y: 300, label: "PC 4 (Target)", color: "#94a3b8" }
-        ];
+        const appContainer = document.getElementById('app-container');
+        const backBtn = document.getElementById('back-btn');
 
-        function log(msg) {
-            logPanel.innerHTML += `> ${msg}<br>`;
-            logPanel.scrollTop = logPanel.scrollHeight;
-        }
+        // --- NAVIGATION ---
 
-        function setMode(mode) {
-            currentMode = mode;
-            centerDevice.label = mode;
-            const labelEl = document.getElementById('device-label');
-            labelEl.innerText = mode;
-            labelEl.style.color = mode === 'HUB' ? 'var(--danger-red)' : 'var(--terminal-green)';
-            log(`Network device changed to: ${mode}`);
-            draw();
-        }
-
-        function sendPacket() {
-            // Start packet from PC 1 to Center
-            packets.push({
-                x: pcs[0].x,
-                y: pcs[0].y,
-                targetX: centerDevice.x,
-                targetY: centerDevice.y,
-                stage: 'to-center', // 'to-center' or 'to-dest'
-                targets: [] // Will be populated when it hits center
+        function renderDashboard() {
+            state.activeModule = null;
+            backBtn.classList.add('hidden');
+            
+            const tpl = document.getElementById('tpl-dashboard').content.cloneNode(true);
+            
+            // Render Badges
+            const badgeContainer = tpl.getElementById('badge-container');
+            state.modules.forEach((m, i) => {
+                const isDone = state.completed[i];
+                const badge = document.createElement('div');
+                badge.className = `flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${isDone ? "bg-green-900/30 text-green-400 border-green-500/50" : "bg-slate-800 text-slate-500 border-slate-700"}`;
+                badge.innerHTML = `<i data-lucide="${m.icon}" width="14"></i> <span>Day ${m.id}</span> ${isDone ? '<i data-lucide="check-circle" width="14"></i>' : ''}`;
+                badgeContainer.appendChild(badge);
             });
-            log("PC 1 sent a confidential packet.");
+
+            // Render Cards
+            const grid = tpl.getElementById('module-grid');
+            state.modules.forEach((m, i) => {
+                const isLocked = i > 0 && !state.completed[i-1];
+                const card = document.createElement('div');
+                card.className = `bg-slate-800 rounded-xl border border-slate-700 shadow-xl overflow-hidden p-6 flex flex-col group transition-all hover:shadow-2xl ${isLocked ? 'opacity-70 grayscale' : 'hover:-translate-y-1 hover:border-blue-500/50'}`;
+                
+                card.innerHTML = `
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${state.completed[i] ? 'bg-green-900/50 text-green-400' : 'bg-blue-900/30 text-blue-400'}">
+                        <i data-lucide="${m.icon}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 flex items-center justify-between">
+                        ${m.title}
+                        ${state.completed[i] ? '<i data-lucide="check-circle" class="text-green-500" width="20"></i>' : ''}
+                    </h3>
+                    <p class="text-slate-400 text-sm mb-6 flex-grow">Unit 7: Network Fundamentals - Day ${m.id}</p>
+                    <button ${isLocked ? 'disabled' : ''} onclick="loadModule(${m.id})" class="px-4 py-2 rounded-lg font-bold w-full flex justify-center items-center gap-2 ${isLocked ? 'bg-slate-700 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg'}">
+                        ${isLocked ? '<i data-lucide="lock" width="16"></i> Locked' : 'Start Mission'}
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+
+            appContainer.innerHTML = '';
+            appContainer.appendChild(tpl);
+            lucide.createIcons();
         }
 
-        function update() {
-            // Update Packets
-            for (let i = packets.length - 1; i >= 0; i--) {
-                let p = packets[i];
-                
-                // Move packet
-                const dx = p.targetX - p.x;
-                const dy = p.targetY - p.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                
-                if (dist < 5) {
-                    // Reached destination
-                    if (p.stage === 'to-center') {
-                        // Logic for Hub vs Switch [Cite: 138-158]
-                        p.stage = 'to-dest';
-                        packets.splice(i, 1); // Remove original packet
+        function loadModule(id) {
+            state.activeModule = id;
+            backBtn.classList.remove('hidden');
+            
+            // Header for module
+            const headerHTML = `
+                <div class="flex items-center justify-between mb-8 fade-in">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white mb-2">${state.modules[id-1].title}</h2>
+                        <div class="flex items-center gap-2 text-slate-400">
+                           <i data-lucide="terminal" width="16"></i>
+                           <span class="font-mono text-sm">training_module_${id}.exe</span>
+                        </div>
+                    </div>
+                    ${state.completed[id-1] ? `
+                    <div class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg border border-green-500/50 font-bold flex items-center gap-2">
+                      <i data-lucide="check-circle" width="20"></i> Module Completed
+                    </div>` : ''}
+                </div>
+                <div class="bg-slate-900/80 backdrop-blur rounded-xl border border-slate-700 shadow-xl overflow-hidden min-h-[500px] flex flex-col justify-center" id="module-content"></div>
+            `;
+            
+            appContainer.innerHTML = headerHTML;
+            const container = document.getElementById('module-content');
+            
+            if (id === 1) app.day1.init(container);
+            if (id === 2) app.day2.init(container);
+            if (id === 3) app.day3.init(container);
+            if (id === 4) app.day4.init(container);
+            if (id === 5) app.day5.init(container);
+
+            lucide.createIcons();
+        }
+
+        function markComplete(id) {
+            state.completed[id-1] = true;
+            // Optionally play sound or show confetti
+            loadModule(id); // Reload header to show badge
+        }
+
+        backBtn.addEventListener('click', renderDashboard);
+
+        // --- MODULE LOGIC WRAPPERS ---
+        const app = {
+            day1: {
+                placed: { cpu: false, ram: false, hdd: false },
+                phase: 'assembly',
+                init: (container) => {
+                    const tpl = document.getElementById('tpl-day1').content.cloneNode(true);
+                    container.appendChild(tpl);
+                    app.day1.placed = { cpu: false, ram: false, hdd: false };
+                    app.day1.phase = 'assembly';
+                    
+                    ['cpu', 'ram', 'hdd'].forEach(type => {
+                        const el = document.getElementById(`drag-${type}`);
+                        el.addEventListener('dragstart', (e) => {
+                            e.dataTransfer.setData('text/plain', type);
+                        });
                         
-                        if (currentMode === 'HUB') {
-                            // Hub: Floods to ALL ports (except sender)
-                            log("HUB broadcasts to everyone! (Shouting)");
-                            [1, 2, 3].forEach(idx => { // PC 2, 3, 4 (indices 1,2,3)
-                                packets.push({
-                                    x: centerDevice.x, y: centerDevice.y,
-                                    targetX: pcs[idx].x, targetY: pcs[idx].y,
-                                    stage: 'arrived', finalDest: pcs[idx].id
-                                });
-                            });
-                        } else {
-                            // Switch: Sends ONLY to specific MAC address (PC 4)
-                            log("SWITCH identifies PC 4 via MAC table. (Whispering)");
-                            packets.push({
-                                x: centerDevice.x, y: centerDevice.y,
-                                targetX: pcs[3].x, targetY: pcs[3].y, // Index 3 is PC 4
-                                stage: 'arrived', finalDest: 4
-                            });
+                        const slot = document.getElementById(`slot-${type}`);
+                        slot.addEventListener('dragover', (e) => e.preventDefault());
+                        slot.addEventListener('drop', (e) => app.day1.handleDrop(e, type));
+                        slot.addEventListener('click', () => app.day1.handleVulnClick(type));
+                    });
+                },
+                handleDrop: (e, slotType) => {
+                    e.preventDefault();
+                    const draggedType = e.dataTransfer.getData('text/plain');
+                    const msgEl = document.getElementById('d1-msg');
+                    
+                    if (draggedType === slotType) {
+                        app.day1.placed[slotType] = true;
+                        document.getElementById(`drag-${draggedType}`).remove();
+                        const slot = document.getElementById(`slot-${slotType}`);
+                        
+                        // Style Update
+                        slot.classList.remove('bg-slate-800', 'border-slate-500');
+                        if (slotType === 'cpu') { slot.classList.add('bg-blue-900/50', 'border-blue-500'); slot.innerHTML = `<i data-lucide="cpu" class="text-blue-400" width="48" height="48"></i>`; }
+                        if (slotType === 'ram') { slot.classList.add('bg-green-900/50', 'border-green-500'); slot.innerHTML = `<i data-lucide="server" class="text-green-400" width="32" height="32"></i>`; }
+                        if (slotType === 'hdd') { slot.classList.add('bg-orange-900/50', 'border-orange-500'); slot.innerHTML = `<i data-lucide="hard-drive" class="text-orange-400" width="48" height="48"></i>`; }
+                        
+                        msgEl.innerText = `> Correct! Installed ${slotType.toUpperCase()}.`;
+                        lucide.createIcons();
+
+                        // Check Completion
+                        if (app.day1.placed.cpu && app.day1.placed.ram && app.day1.placed.hdd) {
+                            app.day1.phase = 'vulnerability';
+                            msgEl.innerText = "> System Assembled. SECURITY ALERT! A 'Cold Boot Attack' is imminent. Click the component vulnerable to data theft.";
+                            msgEl.classList.add('animate-pulse', 'text-red-400');
                         }
-                    } else if (p.stage === 'arrived') {
-                        packets.splice(i, 1);
-                        handleArrival(p.finalDest);
+                    } else {
+                        msgEl.innerText = "> Error: That component doesn't fit there!";
                     }
-                } else {
-                    // Move
-                    p.x += (dx / dist) * 4;
-                    p.y += (dy / dist) * 4;
+                },
+                handleVulnClick: (type) => {
+                    if (app.day1.phase !== 'vulnerability') return;
+                    const msgEl = document.getElementById('d1-msg');
+                    if (type === 'ram') {
+                        msgEl.className = "bg-slate-900 p-4 rounded-lg border border-green-500 w-full text-center text-green-400 font-bold";
+                        msgEl.innerText = "CORRECT! RAM is volatile but holds data briefly. Module Complete!";
+                        setTimeout(() => markComplete(1), 1500);
+                    } else {
+                        msgEl.innerText = type === 'cpu' ? "> Close! CPU has Spectre, but Cold Boot targets memory remanence." : "> Incorrect. Hard Drives are non-volatile.";
+                    }
+                }
+            },
+            day2: {
+                mode: 'HUB',
+                interval: null,
+                simState: { pcs: [], packets: [] },
+                init: (container) => {
+                    const tpl = document.getElementById('tpl-day2').content.cloneNode(true);
+                    container.appendChild(tpl);
+                    app.day2.simState.pcs = [
+                        { id: 1, x: 100, y: 100, label: "PC 1", color: "#94a3b8" },
+                        { id: 2, x: 500, y: 100, label: "PC 2", color: "#94a3b8" },
+                        { id: 3, x: 100, y: 300, label: "PC 3", color: "#94a3b8" },
+                        { id: 4, x: 500, y: 300, label: "PC 4", color: "#94a3b8" }
+                    ];
+                    app.day2.setMode('HUB');
+                    if(app.day2.interval) clearInterval(app.day2.interval);
+                    app.day2.startLoop();
+                },
+                setMode: (m) => {
+                    app.day2.mode = m;
+                    const btnHub = document.getElementById('btn-hub');
+                    const btnSwitch = document.getElementById('btn-switch');
+                    if(!btnHub) return; 
+
+                    // Update UI Buttons
+                    if (m === 'HUB') {
+                        btnHub.className = "px-4 py-2 rounded-lg font-bold transition-all bg-red-600 text-white shadow-lg";
+                        btnSwitch.className = "px-4 py-2 rounded-lg font-bold transition-all bg-slate-700 text-slate-200";
+                    } else {
+                        btnSwitch.className = "px-4 py-2 rounded-lg font-bold transition-all bg-green-600 text-white shadow-lg";
+                        btnHub.className = "px-4 py-2 rounded-lg font-bold transition-all bg-slate-700 text-slate-200";
+                    }
+                    app.day2.log(`Network device changed to: ${m}`);
+                },
+                log: (msg) => {
+                    const el = document.getElementById('d2-logs');
+                    if(el) {
+                        el.innerHTML += `> ${msg}<br>`;
+                        el.scrollTop = el.scrollHeight;
+                    }
+                },
+                sendPacket: () => {
+                    app.day2.simState.packets.push({ x: 100, y: 100, targetX: 300, targetY: 200, stage: 'to-center', from: 1 });
+                    app.day2.log(`PC 1 sent CONFIDENTIAL message to PC 4.`);
+                },
+                startLoop: () => {
+                    const canvas = document.getElementById('network-canvas');
+                    const ctx = canvas.getContext('2d');
+                    const center = { x: 300, y: 200 };
+
+                    app.day2.interval = setInterval(() => {
+                        if (!document.getElementById('network-canvas')) {
+                            clearInterval(app.day2.interval); return;
+                        }
+                        
+                        ctx.clearRect(0,0, 600, 400);
+                        
+                        // Draw Cables
+                        ctx.strokeStyle = "#334155";
+                        ctx.lineWidth = 2;
+                        app.day2.simState.pcs.forEach(pc => {
+                            ctx.beginPath(); ctx.moveTo(pc.x, pc.y); ctx.lineTo(center.x, center.y); ctx.stroke();
+                        });
+
+                        // Draw Center
+                        ctx.fillStyle = app.day2.mode === 'HUB' ? '#ef4444' : '#22c55e';
+                        ctx.beginPath(); ctx.arc(center.x, center.y, 30, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = "white"; ctx.font = "12px monospace"; ctx.textAlign = "center";
+                        ctx.fillText(app.day2.mode, center.x, center.y + 4);
+
+                        // Draw PCs
+                        app.day2.simState.pcs.forEach(pc => {
+                            ctx.fillStyle = pc.color;
+                            ctx.fillRect(pc.x - 20, pc.y - 20, 40, 40);
+                            ctx.fillStyle = "white"; ctx.fillText(pc.label, pc.x, pc.y - 30);
+                            
+                            // Revert color logic
+                            if(pc.color !== "#94a3b8") {
+                                // simple frame counter or timeout logic handled by css logic below? No, handling here strictly
+                            }
+                        });
+
+                        // Packets
+                        let nextPackets = [];
+                        app.day2.simState.packets.forEach(p => {
+                            const dx = p.targetX - p.x;
+                            const dy = p.targetY - p.y;
+                            const dist = Math.sqrt(dx*dx + dy*dy);
+
+                            ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fill();
+
+                            if (dist < 5) {
+                                if (p.stage === 'to-center') {
+                                    if (app.day2.mode === 'HUB') {
+                                        app.day2.log("HUB broadcasts to EVERYONE! (Unsafe)");
+                                        [1, 2, 3].forEach(idx => {
+                                            const t = app.day2.simState.pcs[idx];
+                                            nextPackets.push({ x: center.x, y: center.y, targetX: t.x, targetY: t.y, stage: 'arrived', targetId: t.id });
+                                        });
+                                    } else {
+                                        app.day2.log("SWITCH directs traffic to PC 4. (Safe)");
+                                        const t = app.day2.simState.pcs[3];
+                                        nextPackets.push({ x: center.x, y: center.y, targetX: t.x, targetY: t.y, stage: 'arrived', targetId: t.id });
+                                    }
+                                } else if (p.stage === 'arrived') {
+                                    const pcObj = app.day2.simState.pcs.find(pc => pc.id === p.targetId);
+                                    if (p.targetId === 4) {
+                                        app.day2.log("PC 4 received message.");
+                                        pcObj.color = "#22c55e";
+                                        setTimeout(() => { pcObj.color = "#94a3b8"; }, 500);
+                                        if (app.day2.mode === 'SWITCH') setTimeout(() => markComplete(2), 2000);
+                                    } else {
+                                        app.day2.log(`SECURITY ALERT: PC ${p.targetId} intercepted!`);
+                                        pcObj.color = "#ef4444";
+                                        setTimeout(() => { pcObj.color = "#94a3b8"; }, 500);
+                                    }
+                                }
+                            } else {
+                                p.x += (dx/dist)*5; p.y += (dy/dist)*5;
+                                nextPackets.push(p);
+                            }
+                        });
+                        app.day2.simState.packets = nextPackets;
+
+                    }, 20);
+                }
+            },
+            day3: {
+                complete: false,
+                init: (container) => {
+                    const tpl = document.getElementById('tpl-day3').content.cloneNode(true);
+                    container.appendChild(tpl);
+                    app.day3.complete = false;
+                },
+                choose: (choice) => {
+                    if (app.day3.complete) return;
+                    const history = document.getElementById('d3-history');
+                    
+                    const addMsg = (sender, text, color) => {
+                        const div = document.createElement('div');
+                        div.className = `p-3 rounded-lg max-w-[80%] ${sender.includes('You') ? 'self-end bg-blue-900/50 border border-blue-800' : 'self-start bg-slate-800 border border-slate-700'}`;
+                        div.innerHTML = `<div class="text-xs font-bold opacity-50 mb-1">${sender}</div><div class="${color}">${text}</div>`;
+                        history.appendChild(div);
+                        history.scrollTop = history.scrollHeight;
+                    };
+
+                    if (choice === 'correct') {
+                        addMsg("You (10.0.0.1)", "That's me! My MAC is 00:1A:2B:3C:4D:5E", "text-green-400");
+                        app.day3.complete = true;
+                        setTimeout(() => {
+                            addMsg("Network", "ARP Table Updated. Connection Established.", "text-slate-400");
+                            setTimeout(() => markComplete(3), 1500);
+                        }, 800);
+                    } else if (choice === 'wrong_me') {
+                        addMsg("You (10.0.0.1)", "I think that's me? I don't know my MAC.", "text-red-400");
+                        setTimeout(() => addMsg("Network", "Timeout. 10.0.0.3 is still waiting...", "text-slate-400"), 800);
+                    } else {
+                        addMsg("You (10.0.0.1)", "(Silence)", "text-slate-200");
+                        setTimeout(() => addMsg("Network", "Timeout. 10.0.0.3 is still waiting...", "text-slate-400"), 800);
+                    }
+                }
+            },
+            day4: {
+                packets: [],
+                slots: [null, null, null, null],
+                interval: null,
+                init: (container) => {
+                    const tpl = document.getElementById('tpl-day4').content.cloneNode(true);
+                    container.appendChild(tpl);
+                    
+                    app.day4.packets = [
+                        { id: 3, content: "THE", x: 50, y: 50 },
+                        { id: 1, content: "GET", x: 150, y: 120 },
+                        { id: 4, content: "MONEY", x: 250, y: 60 },
+                        { id: 2, content: "THE", x: 100, y: 200 },
+                    ];
+                    app.day4.slots = [null, null, null, null];
+                    app.day4.renderPackets();
+                    
+                    // Float loop
+                    if(app.day4.interval) clearInterval(app.day4.interval);
+                    app.day4.interval = setInterval(() => {
+                         if (!document.getElementById('d4-area')) { clearInterval(app.day4.interval); return; }
+                         app.day4.packets.forEach(p => {
+                             p.x = Math.max(0, Math.min(300, p.x + (Math.random() - 0.5) * 10));
+                             p.y = Math.max(0, Math.min(200, p.y + (Math.random() - 0.5) * 10));
+                         });
+                         app.day4.renderPackets();
+                    }, 200);
+                },
+                renderPackets: () => {
+                    const area = document.getElementById('d4-area');
+                    if (!area) return;
+                    area.innerHTML = '';
+                    app.day4.packets.forEach(p => {
+                        const btn = document.createElement('button');
+                        btn.className = "px-3 py-1 bg-yellow-100 text-yellow-900 handwriting absolute border border-yellow-300 shadow transform -rotate-2 hover:scale-110 transition font-bold";
+                        btn.style.top = p.y + 'px';
+                        btn.style.left = p.x + 'px';
+                        btn.innerText = `#${p.id} ${p.content}`;
+                        btn.onclick = () => app.day4.handlePacketClick(p.id);
+                        area.appendChild(btn);
+                    });
+                },
+                handlePacketClick: (id) => {
+                    const pIndex = app.day4.packets.findIndex(p => p.id === id);
+                    if (pIndex === -1) return;
+                    const pkt = app.day4.packets[pIndex];
+                    
+                    // Move to slot (id - 1)
+                    app.day4.slots[pkt.id - 1] = pkt;
+                    app.day4.packets.splice(pIndex, 1);
+                    
+                    // Render Slots
+                    const slotEl = document.getElementById(`slot-${pkt.id}`);
+                    slotEl.querySelector('.content').innerHTML = `
+                        <div class="w-full h-full bg-yellow-100 text-yellow-900 font-bold p-1 animate-pulse handwriting">
+                            ${pkt.content}
+                        </div>
+                    `;
+                    
+                    if (app.day4.slots.every(s => s !== null)) {
+                        document.getElementById('d4-success').classList.remove('hidden');
+                        setTimeout(() => markComplete(4), 2000);
+                    }
+                }
+            },
+            day5: {
+                stage: 'sorting',
+                currentItem: 0,
+                handshakeStep: 0,
+                items: [
+                    { name: "Email", type: "TCP" },
+                    { name: "Video Stream", type: "UDP" },
+                    { name: "Web Page", type: "TCP" },
+                    { name: "FPS Game", type: "UDP" }
+                ],
+                init: (container) => {
+                    const tpl = document.getElementById('tpl-day5').content.cloneNode(true);
+                    container.appendChild(tpl);
+                    app.day5.stage = 'sorting';
+                    app.day5.currentItem = 0;
+                    app.day5.handshakeStep = 0;
+                    app.day5.render();
+                },
+                render: () => {
+                    const container = document.getElementById('d5-container');
+                    container.innerHTML = '';
+                    
+                    if (app.day5.stage === 'sorting') {
+                        const item = app.day5.items[app.day5.currentItem];
+                        container.innerHTML = `
+                             <h3 class="text-xl font-bold text-slate-300">Protocol Sorter</h3>
+                             <p class="text-slate-400">Is this application TCP (Reliable) or UDP (Fast)?</p>
+                             <div class="w-64 h-40 bg-slate-800 rounded-2xl shadow-2xl flex items-center justify-center border-4 border-slate-700">
+                                <span class="text-2xl font-bold text-white">${item.name}</span>
+                             </div>
+                             <div class="flex gap-8">
+                                <button onclick="app.day5.handleSort('UDP')" class="w-32 py-4 bg-slate-800 border-2 border-slate-600 rounded-lg flex flex-col items-center gap-2 hover:bg-slate-700">
+                                    <i data-lucide="activity"></i> UDP
+                                </button>
+                                <button onclick="app.day5.handleSort('TCP')" class="w-32 py-4 bg-blue-600 border-2 border-blue-600 rounded-lg flex flex-col items-center gap-2 text-white shadow-lg hover:bg-blue-500">
+                                    <i data-lucide="shield"></i> TCP
+                                </button>
+                             </div>
+                        `;
+                    } else {
+                        const step = app.day5.handshakeStep;
+                        container.innerHTML = `
+                            <h3 class="text-xl font-bold text-green-400">Establish Connection!</h3>
+                            <p class="text-slate-400">Click the packets in the correct order for a 3-Way Handshake.</p>
+                            <div class="flex gap-4 items-center">
+                                <div class="p-4 rounded-lg border-2 transition-all ${step > 0 ? 'bg-green-900 border-green-500 text-white' : 'bg-slate-800 border-slate-600 text-slate-500'}">1. SYN</div>
+                                <i data-lucide="arrow-right" class="text-slate-600"></i>
+                                <div class="p-4 rounded-lg border-2 transition-all ${step > 1 ? 'bg-green-900 border-green-500 text-white' : 'bg-slate-800 border-slate-600 text-slate-500'}">2. SYN-ACK</div>
+                                <i data-lucide="arrow-right" class="text-slate-600"></i>
+                                <div class="p-4 rounded-lg border-2 transition-all ${step > 2 ? 'bg-green-900 border-green-500 text-white' : 'bg-slate-800 border-slate-600 text-slate-500'}">3. ACK</div>
+                            </div>
+                            <div class="flex gap-4 mt-8">
+                                <button onclick="app.day5.handleHandshake('SYN-ACK')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded">Send SYN-ACK</button>
+                                <button onclick="app.day5.handleHandshake('SYN')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded">Send SYN</button>
+                                <button onclick="app.day5.handleHandshake('ACK')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded">Send ACK</button>
+                            </div>
+                        `;
+                    }
+                    lucide.createIcons();
+                },
+                handleSort: (type) => {
+                    const item = app.day5.items[app.day5.currentItem];
+                    if (item.type === type) {
+                        if (app.day5.currentItem < app.day5.items.length - 1) {
+                            app.day5.currentItem++;
+                            app.day5.render();
+                        } else {
+                            app.day5.stage = 'handshake';
+                            app.day5.render();
+                        }
+                    } else {
+                        alert("Wrong! TCP = Reliable, UDP = Fast.");
+                    }
+                },
+                handleHandshake: (stepName) => {
+                    const sequence = ["SYN", "SYN-ACK", "ACK"];
+                    if (sequence[app.day5.handshakeStep] === stepName) {
+                        app.day5.handshakeStep++;
+                        app.day5.render();
+                        if (app.day5.handshakeStep === 3) {
+                            setTimeout(() => markComplete(5), 1000);
+                        }
+                    } else {
+                        app.day5.handshakeStep = 0;
+                        alert("Connection Reset! Order: SYN -> SYN-ACK -> ACK");
+                        app.day5.render();
+                    }
                 }
             }
-        }
+        };
 
-        function handleArrival(pcId) {
-            const pc = pcs.find(p => p.id === pcId);
-            if (pcId === 4) {
-                pc.color = "#22c55e"; // Green for Success
-                log(`PC ${pcId} received the message securely.`);
-            } else {
-                pc.color = "#ef4444"; // Red for Security Breach
-                log(`SECURITY ALERT: PC ${pcId} intercepted the packet!`);
-            }
-            
-            // Reset color after delay
-            setTimeout(() => { pc.color = "#94a3b8"; draw(); }, 1000);
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Cables
-            ctx.strokeStyle = "#475569";
-            ctx.lineWidth = 2;
-            pcs.forEach(pc => {
-                ctx.beginPath();
-                ctx.moveTo(pc.x, pc.y);
-                ctx.lineTo(centerDevice.x, centerDevice.y);
-                ctx.stroke();
-            });
-
-            // Draw PCs
-            pcs.forEach(pc => {
-                ctx.fillStyle = pc.color;
-                ctx.beginPath();
-                ctx.rect(pc.x - 30, pc.y - 30, 60, 40); // Monitor
-                ctx.fill();
-                ctx.fillStyle = "black";
-                ctx.textAlign = "center";
-                ctx.fillText(pc.label, pc.x, pc.y - 40);
-            });
-
-            // Draw Central Device
-            ctx.fillStyle = currentMode === 'HUB' ? '#ef4444' : '#22c55e';
-            ctx.beginPath();
-            ctx.arc(centerDevice.x, centerDevice.y, centerDevice.r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "black";
-            ctx.font = "bold 14px Arial";
-            ctx.fillText(centerDevice.label, centerDevice.x, centerDevice.y + 5);
-
-            // Draw Packets
-            ctx.fillStyle = "white";
-            packets.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
-                ctx.fill();
-            });
-        }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        // Init
-        draw();
-        loop();
+        // Init App
+        renderDashboard();
 
     </script>
 </body>
