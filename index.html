@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetFund Academy: Hub vs Switch Lab</title>
+    <style>
+        :root {
+            --bg-color: #1e293b;
+            --terminal-green: #22c55e;
+            --danger-red: #ef4444;
+            --device-bg: #334155;
+            --text-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { margin-bottom: 10px; }
+        p { max-width: 600px; text-align: center; line-height: 1.5; }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            background: var(--device-bg);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+
+        button:active { transform: scale(0.95); }
+        .btn-hub { background-color: var(--danger-red); color: white; }
+        .btn-switch { background-color: var(--terminal-green); color: black; }
+        .btn-send { background-color: #3b82f6; color: white; }
+
+        #network-canvas {
+            background-color: #0f172a;
+            border: 2px solid #475569;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .log-panel {
+            margin-top: 20px;
+            width: 600px;
+            height: 100px;
+            background: black;
+            color: var(--terminal-green);
+            font-family: monospace;
+            padding: 10px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>network_traffic_sim_v1.0</h1>
+    <p>Lesson 5.2.1: Determine where the data packets go. Select a device type and send a confidential message from <strong>PC 1</strong> to <strong>PC 4</strong>.</p>
+
+    <div class="controls">
+        <div>
+            <label>Current Device:</label>
+            <span id="device-label" style="font-weight:bold; color: var(--danger-red);">HUB</span>
+        </div>
+        <button class="btn-hub" onclick="setMode('HUB')">Install Hub</button>
+        <button class="btn-switch" onclick="setMode('SWITCH')">Install Switch</button>
+        <div style="width: 20px;"></div> <button class="btn-send" onclick="sendPacket()">SEND PACKET</button>
+    </div>
+
+    <canvas id="network-canvas" width="600" height="400"></canvas>
+
+    <div class="log-panel" id="log">
+        > System Ready...<br>
+        > Waiting for device configuration...
+    </div>
+
+    <script>
+        // Configuration and State
+        const canvas = document.getElementById('network-canvas');
+        const ctx = canvas.getContext('2d');
+        const logPanel = document.getElementById('log');
+        
+        let currentMode = 'HUB'; // 'HUB' or 'SWITCH'
+        let packets = [];
+        let animationId;
+
+        // Device Coordinates
+        const centerDevice = { x: 300, y: 200, r: 40, label: "HUB" };
+        const pcs = [
+            { id: 1, x: 100, y: 100, label: "PC 1 (Sender)", color: "#94a3b8" },
+            { id: 2, x: 500, y: 100, label: "PC 2", color: "#94a3b8" },
+            { id: 3, x: 100, y: 300, label: "PC 3", color: "#94a3b8" },
+            { id: 4, x: 500, y: 300, label: "PC 4 (Target)", color: "#94a3b8" }
+        ];
+
+        function log(msg) {
+            logPanel.innerHTML += `> ${msg}<br>`;
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            centerDevice.label = mode;
+            const labelEl = document.getElementById('device-label');
+            labelEl.innerText = mode;
+            labelEl.style.color = mode === 'HUB' ? 'var(--danger-red)' : 'var(--terminal-green)';
+            log(`Network device changed to: ${mode}`);
+            draw();
+        }
+
+        function sendPacket() {
+            // Start packet from PC 1 to Center
+            packets.push({
+                x: pcs[0].x,
+                y: pcs[0].y,
+                targetX: centerDevice.x,
+                targetY: centerDevice.y,
+                stage: 'to-center', // 'to-center' or 'to-dest'
+                targets: [] // Will be populated when it hits center
+            });
+            log("PC 1 sent a confidential packet.");
+        }
+
+        function update() {
+            // Update Packets
+            for (let i = packets.length - 1; i >= 0; i--) {
+                let p = packets[i];
+                
+                // Move packet
+                const dx = p.targetX - p.x;
+                const dy = p.targetY - p.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < 5) {
+                    // Reached destination
+                    if (p.stage === 'to-center') {
+                        // Logic for Hub vs Switch [Cite: 138-158]
+                        p.stage = 'to-dest';
+                        packets.splice(i, 1); // Remove original packet
+                        
+                        if (currentMode === 'HUB') {
+                            // Hub: Floods to ALL ports (except sender)
+                            log("HUB broadcasts to everyone! (Shouting)");
+                            [1, 2, 3].forEach(idx => { // PC 2, 3, 4 (indices 1,2,3)
+                                packets.push({
+                                    x: centerDevice.x, y: centerDevice.y,
+                                    targetX: pcs[idx].x, targetY: pcs[idx].y,
+                                    stage: 'arrived', finalDest: pcs[idx].id
+                                });
+                            });
+                        } else {
+                            // Switch: Sends ONLY to specific MAC address (PC 4)
+                            log("SWITCH identifies PC 4 via MAC table. (Whispering)");
+                            packets.push({
+                                x: centerDevice.x, y: centerDevice.y,
+                                targetX: pcs[3].x, targetY: pcs[3].y, // Index 3 is PC 4
+                                stage: 'arrived', finalDest: 4
+                            });
+                        }
+                    } else if (p.stage === 'arrived') {
+                        packets.splice(i, 1);
+                        handleArrival(p.finalDest);
+                    }
+                } else {
+                    // Move
+                    p.x += (dx / dist) * 4;
+                    p.y += (dy / dist) * 4;
+                }
+            }
+        }
+
+        function handleArrival(pcId) {
+            const pc = pcs.find(p => p.id === pcId);
+            if (pcId === 4) {
+                pc.color = "#22c55e"; // Green for Success
+                log(`PC ${pcId} received the message securely.`);
+            } else {
+                pc.color = "#ef4444"; // Red for Security Breach
+                log(`SECURITY ALERT: PC ${pcId} intercepted the packet!`);
+            }
+            
+            // Reset color after delay
+            setTimeout(() => { pc.color = "#94a3b8"; draw(); }, 1000);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Cables
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 2;
+            pcs.forEach(pc => {
+                ctx.beginPath();
+                ctx.moveTo(pc.x, pc.y);
+                ctx.lineTo(centerDevice.x, centerDevice.y);
+                ctx.stroke();
+            });
+
+            // Draw PCs
+            pcs.forEach(pc => {
+                ctx.fillStyle = pc.color;
+                ctx.beginPath();
+                ctx.rect(pc.x - 30, pc.y - 30, 60, 40); // Monitor
+                ctx.fill();
+                ctx.fillStyle = "black";
+                ctx.textAlign = "center";
+                ctx.fillText(pc.label, pc.x, pc.y - 40);
+            });
+
+            // Draw Central Device
+            ctx.fillStyle = currentMode === 'HUB' ? '#ef4444' : '#22c55e';
+            ctx.beginPath();
+            ctx.arc(centerDevice.x, centerDevice.y, centerDevice.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "black";
+            ctx.font = "bold 14px Arial";
+            ctx.fillText(centerDevice.label, centerDevice.x, centerDevice.y + 5);
+
+            // Draw Packets
+            ctx.fillStyle = "white";
+            packets.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // Init
+        draw();
+        loop();
+
+    </script>
+</body>
+</html>
